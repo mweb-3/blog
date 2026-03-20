@@ -1,0 +1,10 @@
+a {
+    font-size: 13px;
+    color: gray;
+}
+a:hover {
+    color: black;
+}
+hr {
+    margin: 0.75rem 0;
+}

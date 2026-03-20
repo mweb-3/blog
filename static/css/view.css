@@ -1,0 +1,21 @@
+h1 {
+    font-weight: 500;
+    font-size: 1.75rem;
+    margin: 0 0 0.35rem;
+}
+.date {
+    font-size: 13px;
+    margin: 0 0 1.25rem;
+}
+hr {
+    margin-bottom: 1.5rem;
+}
+p.content {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #222;
+    white-space: pre-wrap;
+}
+button {
+    margin-top: 2rem;
+}

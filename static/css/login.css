@@ -1,0 +1,33 @@
+input {
+    font-size: 14px;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid black;
+    box-sizing: border-box;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: 8px;
+    margin: 2px;
+    outline: none;
+}
+input:hover {
+    outline: none;
+}
+button {
+    box-sizing: border-box;
+    margin: 2px;
+}
+button:hover {
+    outline: none;
+}
+#form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20vh;
+    padding: 50px;
+    border-radius: 20px;
+    border: solid black;
+}
+h2 {
+    font-family: 'Lora';
+}

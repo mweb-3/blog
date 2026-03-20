@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/static/css/global.css">
 </head>
 <body>
-<h1>updates</h1>
+<h1>manage posts</h1>
 <hr>
 {% for post in posts %}
 <a href="/post/{{ post.id }}">
@@ -16,16 +16,16 @@
     <h2>{{ post.title }}</h2>
     <p class="date">{{ post.created_at | relative }} &middot; {{ post.created_at | fmt_date }}</p>
     <p class="description">{{ post.content }}</p>
+    <br>
+    <form method="POST" action="/api/delete">
+        <input style="display: none" value="{{ post.id }}" name="post_id">
+        <button type="submit">delete</button>
+    </form>
 </div>
 </a>
 {% endfor %}
 <div class="footer">
-    {% if authorized == 'true'%}
-    <a href="/new">new post</a> &middot; <a href="/admin">manage</a>
-    {% else %}
-    <a href="/login">login</a>
-    {% endif %}
-
+    <a href="/">home</a> &middot; <a href="/new">new post</a> &middot; <a href="/deauth">log out</a>
 </div>
 </body>
 </html>

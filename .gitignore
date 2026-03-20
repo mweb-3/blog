@@ -1,3 +1,6 @@
 .env
 *.db
 *.sqlite3
+.vercel/
+instance/
+__pycache__/
