@@ -1,18 +1,18 @@
 input {
-    font-size: 14px;
-    padding: 0.5rem 1.25rem;
+    font-size: 16px;
+    padding: 0.625rem 1.25rem;
     border: 1px solid black;
-    box-sizing: border-box;
     font-family: 'DM Sans', sans-serif;
     border-radius: 8px;
     margin: 2px;
     outline: none;
+    min-height: 44px;
+    -webkit-appearance: none;
 }
 input:hover {
     outline: none;
 }
 button {
-    box-sizing: border-box;
     margin: 2px;
 }
 button:hover {
@@ -30,4 +30,16 @@ button:hover {
 }
 h2 {
     font-family: 'Lora';
+}
+
+@media (max-width: 480px) {
+    #form {
+        padding: 2rem 1.5rem;
+        margin-top: 15vh;
+        border-radius: 16px;
+    }
+    input, button {
+        width: 100%;
+        margin: 4px 0;
+    }
 }

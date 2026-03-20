@@ -11,10 +11,12 @@ hr {
     margin-bottom: 1.5rem;
 }
 p.content {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.8;
     color: #222;
     white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 button {
     margin-top: 2rem;
