@@ -14,6 +14,7 @@
 <a href="/post/{{ post.id }}">
 <div class="post">
     <h2>{{ post.title }}</h2>
+    {% if loop.first %}<span class="badge">&#x2022; latest</span>{% endif %}
     <p class="date">{{ post.created_at | relative }} &middot; {{ post.created_at | fmt_date }}</p>
     <p class="description">{{ post.content }}</p>
 </div>
