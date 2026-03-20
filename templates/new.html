@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<title>new post</title>
+<style>
+body {
+    font-family: 'DM Sans', sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem;
+}
+a {
+    font-size: 13px;
+    color: gray;
+    text-decoration: none;
+}
+a:hover {
+    color: black;
+}
+hr {
+    border: none;
+    border-top: 0.5px solid lightgray;
+    margin: 0.75rem 0;
+}
+#title {
+    font-family: 'Lora', serif;
+    font-size: 1.75rem;
+    font-weight: 500;
+    border: none;
+    background: none;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+#title:focus {
+    outline: none;
+}
+textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    width: 100%;
+    height: 60vh;
+    background-color: #f0efed;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem;
+    box-sizing: border-box;
+    resize: none;
+    margin-bottom: 1rem;
+}
+textarea:focus {
+    outline: none;
+}
+button {
+    background-color: black;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    border: 1px solid black;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 150ms;
+}
+button:hover {
+    background: white;
+    color: black;
+}
+</style>
+</head>
+<body>
+<a href="/">back</a>
+<form method="POST" action="/submit">
+    <input id="title" name="title" placeholder="post title">
+    <hr>
+    <textarea id="content" name="content" placeholder="type here"></textarea>
+    <button type="submit">submit</button>
+</form>
+</body>
+</html>
