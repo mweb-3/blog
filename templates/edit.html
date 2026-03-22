@@ -4,22 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<title>new post</title>
+<title>edit post</title>
 <link rel="stylesheet" href="/static/css/global.css">
 <link rel="stylesheet" href="/static/css/form.css">
 <link rel="stylesheet" href="/static/css/new.css">
 </head>
 <body>
-<a href="/" class="back-link">&#x2190; back</a>
-<form method="POST" action="/submit">
-    <input id="title" name="title" placeholder="post title" required>
+<a href="/admin" class="back-link">&#x2190; back</a>
+<form method="POST" action="/api/edit">
+    <input type="hidden" name="post_id" value="{{ post.id }}">
+    <input id="title" name="title" value="{{ post.title }}" required>
     <hr>
-    <textarea id="content" name="content" placeholder="type here" required></textarea>
-    <button type="submit">submit</button>
+    <textarea id="content" name="content" required>{{ post.content }}</textarea>
+    <button type="submit">save</button>
 </form>
 <script>
 const ta = document.getElementById('content');
 function autoResize() { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+autoResize();
 ta.addEventListener('input', autoResize);
 </script>
 </body>

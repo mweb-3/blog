@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<title>something went wrong</title>
+<link rel="stylesheet" href="/static/css/global.css">
+<link rel="stylesheet" href="/static/css/error.css">
+</head>
+<body>
+<div class="error-page">
+    <h1>something went wrong</h1>
+    <p class="error-message">sorry about that — try going back or refreshing the page.</p>
+
+    <details class="error-details">
+        <summary class="error-toggle">details</summary>
+        <div class="error-box">
+            <button class="copy-btn" onclick="copyError()" aria-label="Copy error message">copy</button>
+            <pre class="error-text" id="error-text">{{ error }}</pre>
+        </div>
+    </details>
+
+    <a href="/" class="error-home">← back to home</a>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+function copyError() {
+    const text = document.getElementById('error-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const t = document.getElementById('toast');
+        t.textContent = 'copied to clipboard';
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    });
+}
+</script>
+</body>
+</html>

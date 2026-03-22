@@ -8,8 +8,14 @@
 <link rel="stylesheet" href="/static/css/global.css">
 </head>
 <body>
-<h1>updates</h1>
+<div class="page-header">
+    <h1>home</h1>
+    {% if authorized == 'true' %}
+    <a href="/new" class="header-link">write an update</a>
+    {% endif %}
+</div>
 <hr>
+{% if posts %}
 {% for post in posts %}
 <a href="/post/{{ post.id }}">
 <div class="post">
@@ -17,9 +23,15 @@
     {% if loop.first %}<span class="badge">&#x2022; latest</span>{% endif %}
     <p class="date">{{ post.created_at | relative }} &middot; {{ post.created_at | fmt_date }}</p>
     <p class="description">{{ post.content }}</p>
+    {% if authorized == 'true' and reply_counts.get(post.id, 0) > 0 %}
+    <p class="reply-count">{{ reply_counts[post.id] }} {{ 'reply' if reply_counts[post.id] == 1 else 'replies' }}</p>
+    {% endif %}
 </div>
 </a>
 {% endfor %}
+{% else %}
+<p class="empty">nothing here yet</p>
+{% endif %}
 <div class="footer">
     {% if authorized == 'true'%}
     <a href="/new">new post</a> &middot; <a href="/admin">manage</a>

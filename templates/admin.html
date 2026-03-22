@@ -10,20 +10,36 @@
 <body>
 <h1>manage posts</h1>
 <hr>
+{% if posts %}
 {% for post in posts %}
 <a href="/post/{{ post.id }}">
 <div class="post">
     <h2>{{ post.title }}</h2>
     <p class="date">{{ post.created_at | relative }} &middot; {{ post.created_at | fmt_date }}</p>
     <p class="description">{{ post.content }}</p>
-    <br>
-    <form method="POST" action="/api/delete">
-        <input style="display: none" value="{{ post.id }}" name="post_id">
-        <button type="submit">delete</button>
-    </form>
+    <div class="post-actions">
+        <a href="/edit/{{ post.id }}" class="link-btn">edit</a>
+        <span class="sep">&middot;</span>
+        <form method="POST" action="/api/delete" class="delete-form">
+            <input type="hidden" value="{{ post.id }}" name="post_id">
+            <button type="submit" class="link-btn">delete</button>
+        </form>
+    </div>
 </div>
 </a>
 {% endfor %}
+{% else %}
+<p class="empty">no posts yet</p>
+{% endif %}
+<details class="advanced">
+    <summary>advanced</summary>
+    <div class="advanced-content">
+        <form method="POST" action="/api/delete-all" onsubmit="return confirm('delete all posts and reset IDs? this cannot be undone.')">
+            <button type="submit" class="link-btn danger">delete all posts &amp; reset IDs</button>
+        </form>
+    </div>
+</details>
+
 <div class="footer">
     <a href="/">home</a> &middot; <a href="/new">new post</a> &middot; <a href="/deauth">log out</a>
 </div>

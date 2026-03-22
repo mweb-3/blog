@@ -1,0 +1,105 @@
+.error-page {
+    text-align: center;
+    padding-top: 4rem;
+}
+.error-page h1 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+.error-message {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 2rem;
+}
+.error-details {
+    text-align: left;
+    max-width: 100%;
+    margin: 0 auto 2rem;
+}
+.error-toggle {
+    font-size: 13px;
+    color: gray;
+    cursor: pointer;
+    list-style: none;
+    text-decoration: underline dotted gray;
+    text-underline-offset: 3px;
+    text-align: center;
+}
+.error-toggle::-webkit-details-marker {
+    display: none;
+}
+.error-toggle:hover {
+    color: black;
+    text-decoration-color: black;
+}
+.error-box {
+    position: relative;
+    margin-top: 0.75rem;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.copy-btn {
+    all: unset;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: gray;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: color 200ms ease;
+}
+.copy-btn:hover {
+    color: black;
+    background: none;
+}
+.copy-btn:active {
+    transform: none;
+}
+.error-text {
+    font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    color: #444;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+    line-height: 1.6;
+}
+.error-home {
+    font-size: 14px;
+    color: gray;
+    text-decoration: none;
+    display: inline-block;
+    min-height: 44px;
+    line-height: 44px;
+}
+.error-home:hover {
+    color: black;
+}
+
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(1rem);
+    background: #111;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 0.6rem 1.25rem;
+    border-radius: 999px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease, transform 300ms ease;
+    z-index: 100;
+    white-space: nowrap;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
