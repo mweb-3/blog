@@ -10,6 +10,8 @@ CT = ZoneInfo("America/Chicago")
 
 app = Flask(__name__)
 
+AUTH_KEY = os.getenv('AUTH_KEY')
+
 def get_db():
     return libsql_client.create_client_sync(
         url=os.environ["TURSO_URL"],
@@ -187,7 +189,7 @@ def admin():
 
 @app.route('/api/authorize', methods=['POST'])
 def authorize():
-    if request.form.get('username') == 'Tara':
+    if request.form.get('username') == AUTH_KEY:
         resp = make_response(redirect('/admin'))
         resp.set_cookie('authorized', 'true')
         return resp
