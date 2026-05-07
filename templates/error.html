@@ -7,8 +7,10 @@
 <title>something went wrong</title>
 <link rel="stylesheet" href="/static/css/global.css">
 <link rel="stylesheet" href="/static/css/error.css">
+{% include '_theme_head.html' %}
 </head>
 <body>
+{% include '_theme_button.html' %}
 <div class="error-page">
     <h1>something went wrong</h1>
     <p class="error-message">sorry about that — try going back or refreshing the page.</p>
@@ -21,7 +23,10 @@
         </div>
     </details>
 
-    <a href="/" class="error-home">← back to home</a>
+    <a class="btn btn-quiet" href="/">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3.5 5 8l4.5 4.5"/></svg>
+        Back to home
+    </a>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>

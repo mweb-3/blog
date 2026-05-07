@@ -1,14 +1,19 @@
-from flask import Flask, render_template, request, redirect, make_response
+from flask import Flask, render_template, request, redirect, make_response, jsonify
 import libsql_client
 import humanize
+import requests
 from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
 import os
+import re
+import uuid
 import traceback
 
 CT = ZoneInfo("America/Chicago")
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
+app.config['MAX_FORM_MEMORY_SIZE'] = 25 * 1024 * 1024
 
 AUTH_KEY = os.getenv('AUTH_KEY')
 
@@ -28,19 +33,6 @@ class Post:
         else:
             self.created_at = created_at
 
-class Reply:
-    def __init__(self, id, post_id, author, content, created_at, parent_id=None):
-        self.id = id
-        self.post_id = post_id
-        self.author = author
-        self.content = content
-        self.parent_id = parent_id
-        self.responses = []
-        if isinstance(created_at, str):
-            self.created_at = datetime.fromisoformat(created_at)
-        else:
-            self.created_at = created_at
-
 def rows_to_posts(rows):
     return [Post(row[0], row[1], row[2], row[3]) for row in rows]
 
@@ -54,45 +46,32 @@ try:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    client.execute("""
-        CREATE TABLE IF NOT EXISTS reply (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            post_id INTEGER NOT NULL,
-            author TEXT NOT NULL,
-            content TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            visibility TEXT DEFAULT 'private',
-            parent_id INTEGER
-        )
-    """)
-    try:
-        client.execute("ALTER TABLE reply ADD COLUMN visibility TEXT DEFAULT 'private'")
-    except:
-        pass
-    try:
-        client.execute("ALTER TABLE reply ADD COLUMN parent_id INTEGER")
-    except:
-        pass
     client.close()
 except:
     pass
+
+@app.context_processor
+def inject_auth():
+    return {'authorized': request.cookies.get('authorized') == 'true'}
+
+@app.template_filter('summary')
+def summary_filter(html):
+    text = re.sub(r'<[^>]+>', ' ', html or '')
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
 @app.route("/")
 def index():
     client = get_db()
     result = client.execute("SELECT id, title, content, created_at FROM post ORDER BY created_at DESC")
     posts = rows_to_posts(result.rows)
-    authorized = request.cookies.get('authorized')
-    reply_counts = {}
-    if authorized == 'true':
-        for post in posts:
-            r = client.execute("SELECT COUNT(*) FROM reply WHERE post_id = ?", [post.id])
-            reply_counts[post.id] = r.rows[0][0]
     client.close()
-    return render_template('index.html', posts=posts, humanize=humanize, authorized=authorized, reply_counts=reply_counts)
+    return render_template('index.html', posts=posts, humanize=humanize)
 
 @app.route('/submit', methods=['POST'])
 def submit():
+    if request.cookies.get('authorized') != 'true':
+        return redirect('/login')
     title = request.form.get('title')
     content = request.form.get('content')
     client = get_db()
@@ -117,39 +96,13 @@ def view(id):
     client = get_db()
     result = client.execute("SELECT id, title, content, created_at FROM post WHERE id = ?", [id])
     post = Post(result.rows[0][0], result.rows[0][1], result.rows[0][2], result.rows[0][3]) if result.rows else None
-    authorized = request.cookies.get('authorized') == 'true'
-    if not authorized:
-        client.close()
-        return render_template('view.html', post=post, replies=[], authorized=False)
-    r = client.execute("SELECT id, post_id, author, content, created_at, parent_id FROM reply WHERE post_id = ? ORDER BY created_at DESC", [id])
-    all_replies = [Reply(row[0], row[1], row[2], row[3], row[4], row[5]) for row in r.rows]
-    # Thread responses under their parents
-    reply_map = {r.id: r for r in all_replies}
-    top_level = []
-    for reply in all_replies:
-        if reply.parent_id and reply.parent_id in reply_map:
-            reply_map[reply.parent_id].responses.append(reply)
-        elif not reply.parent_id:
-            top_level.append(reply)
-    # Sort responses chronologically (oldest first)
-    for reply in top_level:
-        reply.responses.sort(key=lambda r: r.created_at)
     client.close()
-    return render_template('view.html', post=post, replies=top_level, authorized=authorized)
-
-@app.route('/api/reply', methods=['POST'])
-def add_reply():
-    post_id = request.form.get('post_id')
-    author = request.form.get('author')
-    content = request.form.get('content')
-    parent_id = request.form.get('parent_id') or None
-    client = get_db()
-    client.execute("INSERT INTO reply (post_id, author, content, parent_id) VALUES (?, ?, ?, ?)", [post_id, author, content, parent_id])
-    client.close()
-    return redirect('/post/' + post_id + '?sent=1')
+    return render_template('view.html', post=post)
 
 @app.route('/new')
 def new_post():
+    if request.cookies.get('authorized') != 'true':
+        return redirect('/login')
     return render_template('new.html')
 
 @app.route('/edit/<int:id>')
@@ -164,6 +117,8 @@ def edit_post(id):
 
 @app.route('/api/edit', methods=['POST'])
 def update_post():
+    if request.cookies.get('authorized') != 'true':
+        return redirect('/login')
     post_id = request.form.get('post_id')
     title = request.form.get('title')
     content = request.form.get('content')
@@ -195,20 +150,60 @@ def authorize():
         return resp
     else:
         return redirect('/')
-    
+
 @app.route('/deauth')
 def deauth():
     resp = make_response(redirect('/'))
     resp.set_cookie('authorized', 'false')
     return resp
 
-    
+
+@app.route('/api/upload-image', methods=['POST'])
+def upload_image():
+    if request.cookies.get('authorized') != 'true':
+        return jsonify({'error': 'unauthorized'}), 401
+    token = os.environ.get('BLOB_READ_WRITE_TOKEN')
+    if not token:
+        return jsonify({'error': 'blob storage not configured'}), 500
+    file = request.files.get('image')
+    if not file:
+        return jsonify({'error': 'no file'}), 400
+
+    mimetype = file.mimetype or 'application/octet-stream'
+    ext = ''
+    if file.filename and '.' in file.filename:
+        ext = file.filename.rsplit('.', 1)[-1].lower()
+    if not ext and '/' in mimetype:
+        ext = mimetype.split('/', 1)[1]
+    pathname = f'images/{uuid.uuid4().hex}.{ext or "bin"}'
+
+    try:
+        resp = requests.put(
+            f'https://blob.vercel-storage.com/{pathname}',
+            data=file.read(),
+            headers={
+                'authorization': f'Bearer {token}',
+                'x-api-version': '7',
+                'x-content-type': mimetype,
+                'access': 'public',
+                'x-add-random-suffix': '0',
+            },
+            timeout=30,
+        )
+    except Exception as e:
+        return jsonify({'error': f'upload failed: {e}'}), 502
+    if resp.status_code >= 300:
+        return jsonify({'error': 'blob api error', 'status': resp.status_code, 'detail': resp.text}), 502
+    data = resp.json()
+    return jsonify({'url': data.get('url')})
+
 @app.route('/api/delete', methods=['POST'])
 def delete():
+    if request.cookies.get('authorized') != 'true':
+        return redirect('/login')
     post_id = request.form.get('post_id')
     client = get_db()
     client.execute("DELETE FROM post WHERE id = ?", [post_id])
-    client.execute("DELETE FROM reply WHERE post_id = ?", [post_id])
     client.close()
     return redirect('/admin')
 
@@ -218,9 +213,7 @@ def delete_all():
         return redirect('/login')
     client = get_db()
     client.execute("DELETE FROM post")
-    client.execute("DELETE FROM reply")
     client.execute("DELETE FROM sqlite_sequence WHERE name = 'post'")
-    client.execute("DELETE FROM sqlite_sequence WHERE name = 'reply'")
     client.close()
     return redirect('/admin')
 

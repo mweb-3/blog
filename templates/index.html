@@ -4,12 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<title>updates</title>
+<title>miles</title>
 <link rel="stylesheet" href="/static/css/global.css">
+{% include '_theme_head.html' %}
 </head>
 <body>
+{% include '_theme_button.html' %}
 <div class="page-header">
-    <h1>delta</h1>
+    <h1>miles</h1>
+    {% if authorized %}
+    <div class="header-actions">
+        <a class="btn btn-ghost" href="/admin">Manage</a>
+        <a class="btn btn-primary" href="/new">+ New</a>
+    </div>
+    {% endif %}
 </div>
 <hr>
 {% if posts %}
@@ -19,22 +27,12 @@
     <h2>{{ post.title }}</h2>
     {% if loop.first %}<span class="badge">&#x2022; latest</span>{% endif %}
     <p class="date">{{ post.created_at | relative }} &middot; {{ post.created_at | fmt_date }}</p>
-    <p class="description">{{ post.content }}</p>
-    {% if authorized == 'true' and reply_counts.get(post.id, 0) > 0 %}
-    <p class="reply-count">{{ reply_counts[post.id] }} {{ 'reply' if reply_counts[post.id] == 1 else 'replies' }}</p>
-    {% endif %}
+    <p class="description">{{ post.content | summary }}</p>
 </div>
 </a>
 {% endfor %}
 {% else %}
 <p class="empty">nothing here yet</p>
 {% endif %}
-<div class="footer">
-    {% if authorized == 'true'%}
-    <a href="/new">new post</a> &middot; <a href="/admin">manage</a>
-    {% else %}
-    <a href="/login">login</a>
-    {% endif %}
-</div>
 </body>
 </html>

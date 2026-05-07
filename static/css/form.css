@@ -1,6 +1,6 @@
 .back-link {
     font-size: 14px;
-    color: gray;
+    color: var(--text-muted);
     text-decoration: none;
     display: inline-block;
     padding: 0.5rem 0;
@@ -8,7 +8,7 @@
     line-height: 44px;
 }
 .back-link:hover {
-    color: black;
+    color: var(--text);
 }
 hr {
     margin: 0.75rem 0;

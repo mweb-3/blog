@@ -4,10 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-<title>updates</title>
+<title>manage</title>
 <link rel="stylesheet" href="/static/css/global.css">
+{% include '_theme_head.html' %}
 </head>
 <body>
+{% include '_theme_button.html' %}
+<div class="page-toolbar">
+    <a class="btn btn-quiet" href="/">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3.5 5 8l4.5 4.5"/></svg>
+        Home
+    </a>
+    <div class="toolbar-actions">
+        <a class="btn btn-primary" href="/new">+ New</a>
+    </div>
+</div>
 <h1>manage posts</h1>
 <hr>
 {% if posts %}
@@ -16,7 +27,7 @@
 <div class="post">
     <h2>{{ post.title }}</h2>
     <p class="date">{{ post.created_at | relative }} &middot; {{ post.created_at | fmt_date }}</p>
-    <p class="description">{{ post.content }}</p>
+    <p class="description">{{ post.content | summary }}</p>
     <div class="post-actions">
         <a href="/edit/{{ post.id }}" class="link-btn">edit</a>
         <span class="sep">&middot;</span>
@@ -32,16 +43,19 @@
 <p class="empty">no posts yet</p>
 {% endif %}
 <details class="advanced">
-    <summary>advanced</summary>
+    <summary class="btn btn-quiet">
+        <svg class="advanced-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5 9.5 9 5 13.5"/></svg>
+        Advanced
+    </summary>
     <div class="advanced-content">
         <form method="POST" action="/api/delete-all" onsubmit="return confirm('delete all posts and reset IDs? this cannot be undone.')">
-            <button type="submit" class="link-btn danger">delete all posts &amp; reset IDs</button>
+            <button type="submit" class="btn btn-danger">Delete all posts &amp; reset IDs</button>
         </form>
     </div>
 </details>
 
 <div class="footer">
-    <a href="/">home</a> &middot; <a href="/new">new post</a> &middot; <a href="/deauth">log out</a>
+    <a class="btn btn-quiet" href="/deauth">Log out</a>
 </div>
 </body>
 </html>

@@ -1,21 +1,30 @@
 input {
     font-size: 16px;
     padding: 0.7rem 1.5rem;
-    border: 1px solid #ddd;
+    border: 0.5px solid var(--hairline-strong);
     font-family: 'DM Sans', sans-serif;
     border-radius: 999px;
     margin: 2px;
     outline: none;
     min-height: 44px;
     -webkit-appearance: none;
-    transition: border-color 200ms ease;
+    appearance: none;
+    transition: border-color 200ms ease, background 200ms ease;
+    background: var(--bg);
+    color: var(--text);
+}
+input::placeholder {
+    color: var(--text-muted);
 }
 input:focus {
-    border-color: #111;
+    border-color: var(--text);
     outline: none;
 }
-button {
-    margin: 2px;
+.login-submit {
+    margin: 0.5rem 0 0;
+    padding: 0.7rem 1.4rem;
+    min-height: 44px;
+    font-size: 14px;
 }
 #form {
     display: flex;
@@ -25,10 +34,12 @@ button {
     margin-top: 20vh;
     padding: 50px;
     border-radius: 24px;
-    border: 1px solid #ddd;
+    border: 0.5px solid var(--hairline-strong);
+    background: var(--bg-card);
 }
 h2 {
     font-family: 'Lora';
+    color: var(--text);
 }
 
 @media (max-width: 480px) {

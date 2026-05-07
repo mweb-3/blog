@@ -9,16 +9,23 @@
     <link rel="stylesheet" href="/static/css/global.css">
     <link rel="stylesheet" href="/static/css/form.css">
     <link rel="stylesheet" href="/static/css/login.css">
+    {% include '_theme_head.html' %}
 </head>
 
 <body>
-    <a href="/" class="back-link">&#x2190; back</a>
+    {% include '_theme_button.html' %}
+    <div class="page-toolbar">
+        <a class="btn btn-quiet" href="/">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3.5 5 8l4.5 4.5"/></svg>
+            Back
+        </a>
+    </div>
 
     <div id="form">
         <h2>log in</h2>
         <form method="POST" action="/api/authorize">
             <input placeholder="enter auth token" name="username" type="text" autocomplete="off" required>
-            <button type="submit">continue</button>
+            <button type="submit" class="btn btn-primary login-submit">Continue</button>
         </form>
     </div>
 </body>

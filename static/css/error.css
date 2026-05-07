@@ -6,10 +6,11 @@
     font-size: 1.5rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
+    color: var(--text);
 }
 .error-message {
     font-size: 15px;
-    color: #666;
+    color: var(--text-muted);
     margin-bottom: 2rem;
 }
 .error-details {
@@ -19,10 +20,10 @@
 }
 .error-toggle {
     font-size: 13px;
-    color: gray;
+    color: var(--text-muted);
     cursor: pointer;
     list-style: none;
-    text-decoration: underline dotted gray;
+    text-decoration: underline dotted var(--text-muted);
     text-underline-offset: 3px;
     text-align: center;
 }
@@ -30,14 +31,14 @@
     display: none;
 }
 .error-toggle:hover {
-    color: black;
-    text-decoration-color: black;
+    color: var(--text);
+    text-decoration-color: var(--text);
 }
 .error-box {
     position: relative;
     margin-top: 0.75rem;
-    background: #fafafa;
-    border: 1px solid #eee;
+    background: var(--code-block-bg);
+    border: 0.5px solid var(--hairline);
     border-radius: 8px;
     padding: 1rem;
 }
@@ -48,14 +49,14 @@
     right: 0.5rem;
     font-family: 'DM Sans', sans-serif;
     font-size: 12px;
-    color: gray;
+    color: var(--text-muted);
     cursor: pointer;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     transition: color 200ms ease;
 }
 .copy-btn:hover {
-    color: black;
+    color: var(--text);
     background: none;
 }
 .copy-btn:active {
@@ -64,7 +65,7 @@
 .error-text {
     font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
     font-size: 13px;
-    color: #444;
+    color: var(--text);
     white-space: pre-wrap;
     word-break: break-word;
     margin: 0;
@@ -72,14 +73,14 @@
 }
 .error-home {
     font-size: 14px;
-    color: gray;
+    color: var(--text-muted);
     text-decoration: none;
     display: inline-block;
     min-height: 44px;
     line-height: 44px;
 }
 .error-home:hover {
-    color: black;
+    color: var(--text);
 }
 
 .toast {
@@ -87,8 +88,8 @@
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%) translateY(1rem);
-    background: #111;
-    color: white;
+    background: var(--button-primary-bg);
+    color: var(--button-primary-fg);
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     padding: 0.6rem 1.25rem;
@@ -98,6 +99,7 @@
     transition: opacity 300ms ease, transform 300ms ease;
     z-index: 100;
     white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 .toast.show {
     opacity: 1;
