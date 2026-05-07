@@ -158,20 +158,14 @@ def deauth():
     return resp
 
 
-def _blob_store_id():
-    token = os.environ.get('BLOB_READ_WRITE_TOKEN', '')
-    parts = token.split('_')
-    if len(parts) >= 4 and parts[0] == 'vercel' and parts[1] == 'blob':
-        return parts[3]
-    return None
-
 @app.route('/api/upload-image', methods=['POST'])
 def upload_image():
     if request.cookies.get('authorized') != 'true':
         return jsonify({'error': 'unauthorized'}), 401
-    token = os.environ.get('BLOB_READ_WRITE_TOKEN')
+    token = os.environ.get('BLOB1_READ_WRITE_TOKEN')
     if not token:
-        return jsonify({'error': 'blob storage not configured'}), 500
+        blob_keys = sorted(k for k in os.environ.keys() if 'BLOB' in k.upper())
+        return jsonify({'error': 'blob storage not configured', 'blob_env_keys': blob_keys}), 500
     file = request.files.get('image')
     if not file:
         return jsonify({'error': 'no file'}), 400
@@ -192,7 +186,7 @@ def upload_image():
                 'authorization': f'Bearer {token}',
                 'x-api-version': '8',
                 'x-content-type': mimetype,
-                'x-access': 'private',
+                'x-access': 'public',
                 'x-add-random-suffix': '0',
             },
             timeout=30,
@@ -201,42 +195,8 @@ def upload_image():
         return jsonify({'error': f'upload failed: {e}'}), 502
     if resp.status_code >= 300:
         return jsonify({'error': 'blob api error', 'status': resp.status_code, 'detail': resp.text}), 502
-    return jsonify({'url': f'/blob/{pathname}'})
-
-@app.route('/blob/<path:pathname>')
-def blob_proxy(pathname):
-    token = os.environ.get('BLOB_READ_WRITE_TOKEN')
-    store_id = _blob_store_id()
-    if not token or not store_id:
-        return 'storage not configured', 500
-    blob_url = f'https://{store_id}.public.blob.vercel-storage.com/{pathname}'
-    headers = {'authorization': f'Bearer {token}'}
-    if request.headers.get('if-none-match'):
-        headers['if-none-match'] = request.headers['if-none-match']
-    try:
-        upstream = requests.get(blob_url, headers=headers, stream=True, timeout=30)
-    except Exception as e:
-        return f'fetch failed: {e}', 502
-    if upstream.status_code == 304:
-        return '', 304
-    if upstream.status_code >= 400:
-        return f'blob {upstream.status_code}', upstream.status_code
-
-    def stream():
-        for chunk in upstream.iter_content(8192):
-            if chunk:
-                yield chunk
-
-    response = app.response_class(
-        stream(),
-        content_type=upstream.headers.get('content-type', 'application/octet-stream'),
-    )
-    response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
-    if upstream.headers.get('etag'):
-        response.headers['ETag'] = upstream.headers['etag']
-    if upstream.headers.get('content-length'):
-        response.headers['Content-Length'] = upstream.headers['content-length']
-    return response
+    data = resp.json()
+    return jsonify({'url': data.get('url')})
 
 @app.route('/api/delete', methods=['POST'])
 def delete():
