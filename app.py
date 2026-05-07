@@ -190,8 +190,9 @@ def upload_image():
             data=file.read(),
             headers={
                 'authorization': f'Bearer {token}',
-                'x-api-version': '7',
+                'x-api-version': '8',
                 'x-content-type': mimetype,
+                'x-access': 'private',
                 'x-add-random-suffix': '0',
             },
             timeout=30,
