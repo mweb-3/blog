@@ -38,37 +38,6 @@
         [{ 'list': 'bullet' }, { 'list': 'ordered' }],
     ];
 
-    const toggleInline = (name) => function (range) {
-        if (!range) return;
-        const fmt = this.quill.getFormat(range);
-        this.quill.format(name, !fmt[name], 'user');
-    };
-
-    const toggleHeader = (level) => function (range) {
-        if (!range) return;
-        const fmt = this.quill.getFormat(range);
-        this.quill.format('header', fmt.header === level ? false : level, 'user');
-    };
-
-    const setBody = function (range) {
-        if (!range) return;
-        ['header', 'blockquote', 'code-block', 'list', 'caption'].forEach((n) => {
-            this.quill.format(n, false, 'user');
-        });
-    };
-
-    const toggleList = (kind) => function (range) {
-        if (!range) return;
-        const fmt = this.quill.getFormat(range);
-        this.quill.format('list', fmt.list === kind ? false : kind, 'user');
-    };
-
-    const toggleQuote = function (range) {
-        if (!range) return;
-        const fmt = this.quill.getFormat(range);
-        this.quill.format('blockquote', !fmt.blockquote, 'user');
-    };
-
     const triggerLink = function () {
         const linkBtn = document.querySelector('.ql-tooltip .ql-link');
         if (linkBtn) linkBtn.click();
@@ -577,22 +546,92 @@
     quill.on('text-change', renumberFootnotes);
     renumberFootnotes();
 
-    [
-        [{ key: 'X', shortKey: true, shiftKey: true }, toggleInline('strike')],
-        [{ key: 'K', shortKey: true }, triggerLink],
-        [{ key: '1', shortKey: true, altKey: true }, toggleHeader(1)],
-        [{ key: '2', shortKey: true, altKey: true }, toggleHeader(2)],
-        [{ key: '3', shortKey: true, altKey: true }, toggleHeader(3)],
-        [{ key: '0', shortKey: true, altKey: true }, setBody],
-        [{ key: '8', shortKey: true, shiftKey: true }, toggleList('bullet')],
-        [{ key: '7', shortKey: true, shiftKey: true }, toggleList('ordered')],
-        [{ key: 'Q', shortKey: true, shiftKey: true }, toggleQuote],
-        [{ key: 'E', shortKey: true }, toggleInline('code')],
-        [{ key: 'I', shortKey: true, shiftKey: true }, triggerImage],
-        [{ key: 'N', shortKey: true, altKey: true }, function () { insertFootnote(); }],
-    ].forEach(([binding, handler]) => {
-        quill.keyboard.addBinding(binding, handler);
-    });
+    function toggleInlineFmt(name) {
+        const range = quill.getSelection();
+        if (!range) return;
+        const fmt = quill.getFormat(range);
+        quill.format(name, !fmt[name], 'user');
+    }
+    function toggleLineHeader(level) {
+        const range = quill.getSelection();
+        if (!range) return;
+        const fmt = quill.getFormat(range);
+        quill.format('header', fmt.header === level ? false : level, 'user');
+    }
+    function setLineBody() {
+        const range = quill.getSelection();
+        if (!range) return;
+        ['header', 'blockquote', 'code-block', 'list', 'caption'].forEach((n) => {
+            quill.format(n, false, 'user');
+        });
+    }
+    function toggleLineList(kind) {
+        const range = quill.getSelection();
+        if (!range) return;
+        const fmt = quill.getFormat(range);
+        quill.format('list', fmt.list === kind ? false : kind, 'user');
+    }
+    function toggleLineQuote() {
+        const range = quill.getSelection();
+        if (!range) return;
+        const fmt = quill.getFormat(range);
+        quill.format('blockquote', !fmt.blockquote, 'user');
+    }
+    function toggleLineCodeBlock() {
+        const range = quill.getSelection();
+        if (!range) return;
+        const fmt = quill.getFormat(range);
+        quill.format('code-block', !fmt['code-block'], 'user');
+    }
+    function insertDividerAtCursor() {
+        const range = quill.getSelection();
+        if (!range) return;
+        const [line] = quill.getLine(range.index);
+        if (!line) return;
+        const start = quill.getIndex(line);
+        const len = line.length();
+        const txt = (line.domNode.textContent || '');
+        if (txt.trim() === '' && len <= 1) {
+            quill.insertEmbed(start, 'divider', true, 'user');
+            quill.setSelection(start + 1, 0, 'user');
+        } else {
+            quill.insertText(range.index, '\n', 'user');
+            quill.insertEmbed(range.index + 1, 'divider', true, 'user');
+            quill.setSelection(range.index + 2, 0, 'user');
+        }
+    }
+
+    const shortcutTable = [
+        { code: 'KeyX', shift: true,  alt: false, fn: () => toggleInlineFmt('strike') },
+        { code: 'KeyK', shift: false, alt: false, fn: triggerLink },
+        { code: 'Digit1', shift: false, alt: true, fn: () => toggleLineHeader(1) },
+        { code: 'Digit2', shift: false, alt: true, fn: () => toggleLineHeader(2) },
+        { code: 'Digit3', shift: false, alt: true, fn: () => toggleLineHeader(3) },
+        { code: 'Digit0', shift: false, alt: true, fn: setLineBody },
+        { code: 'Digit8', shift: true,  alt: false, fn: () => toggleLineList('bullet') },
+        { code: 'Digit7', shift: true,  alt: false, fn: () => toggleLineList('ordered') },
+        { code: 'KeyQ', shift: true,  alt: false, fn: toggleLineQuote },
+        { code: 'KeyE', shift: false, alt: false, fn: () => toggleInlineFmt('code') },
+        { code: 'KeyC', shift: true,  alt: false, fn: toggleLineCodeBlock },
+        { code: 'KeyD', shift: true,  alt: false, fn: insertDividerAtCursor },
+        { code: 'KeyI', shift: true,  alt: false, fn: triggerImage },
+        { code: 'KeyN', shift: false, alt: true,  fn: insertFootnote },
+    ];
+
+    quill.root.addEventListener('keydown', (e) => {
+        if (slashMenu.open) return;
+        const mod = e.metaKey || e.ctrlKey;
+        if (!mod) return;
+        for (const s of shortcutTable) {
+            if (s.code !== e.code) continue;
+            if (s.shift !== e.shiftKey) continue;
+            if (s.alt !== e.altKey) continue;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            s.fn();
+            return;
+        }
+    }, true);
 
     const tooltipMap = [
         ['.ql-bold', 'Bold', '⌘B'],
@@ -601,7 +640,7 @@
         ['.ql-strike', 'Strikethrough', '⌘⇧X'],
         ['.ql-link', 'Link', '⌘K'],
         ['.ql-blockquote', 'Quote', '⌘⇧Q'],
-        ['.ql-code-block', 'Code block', null],
+        ['.ql-code-block', 'Code block', '⌘⇧C'],
         ['.ql-list[value="ordered"]', 'Numbered list', '⌘⇧7'],
         ['.ql-list[value="bullet"]', 'Bulleted list', '⌘⇧8'],
         ['.ql-header[value="1"]', 'Heading 1', '⌘⌥1'],
@@ -654,6 +693,338 @@
             overlay.hidden ? openCheatsheet() : closeCheatsheet();
         }
     });
+
+    const slashItems = [
+        { id: 'h1',          label: 'Heading 1',     desc: 'Large section heading', icon: 'H1', keywords: ['heading 1', 'h1', 'title'] },
+        { id: 'h2',          label: 'Heading 2',     desc: 'Medium section heading', icon: 'H2', keywords: ['heading 2', 'h2'] },
+        { id: 'h3',          label: 'Heading 3',     desc: 'Small section heading', icon: 'H3', keywords: ['heading 3', 'h3', 'subheading'] },
+        { id: 'body',        label: 'Body text',     desc: 'Plain paragraph', icon: '¶', keywords: ['body', 'text', 'paragraph', 'normal', 'plain'] },
+        { id: 'bullet',      label: 'Bulleted list', desc: 'Simple bulleted list', icon: '•', keywords: ['bullet', 'list', 'unordered'] },
+        { id: 'ordered',     label: 'Numbered list', desc: 'Ordered list', icon: '1.', keywords: ['numbered', 'ordered', 'list'] },
+        { id: 'quote',       label: 'Quote',         desc: 'Block quote', icon: '“', keywords: ['quote', 'blockquote'] },
+        { id: 'inline-code', label: 'Inline code',   desc: 'Monospace within a line', icon: '`c`', keywords: ['inline code', 'code', 'mono', 'monospace'] },
+        { id: 'code',        label: 'Code block',    desc: 'Multi-line code snippet', icon: '<>', keywords: ['code block', 'codeblock', 'code', 'pre'] },
+        { id: 'divider',     label: 'Divider',       desc: 'Horizontal rule', icon: '—', keywords: ['divider', 'rule', 'separator', 'hr', 'horizontal'] },
+    ];
+
+    const slashMenu = { el: null, open: false, startIndex: 0, query: '', selectedIndex: 0, filtered: [] };
+
+    function buildSlashMenu() {
+        const el = document.createElement('div');
+        el.className = 'slash-menu';
+        el.setAttribute('role', 'listbox');
+        el.hidden = true;
+        el.addEventListener('mousedown', (e) => { e.preventDefault(); });
+
+        const list = document.createElement('div');
+        list.className = 'slash-menu-list';
+        el.appendChild(list);
+
+        const footer = document.createElement('div');
+        footer.className = 'slash-menu-footer';
+        el.appendChild(footer);
+
+        document.body.appendChild(el);
+        slashMenu.el = el;
+        slashMenu.listEl = list;
+        slashMenu.footerEl = footer;
+    }
+
+    function filterSlashItems(query) {
+        const q = query.trim().toLowerCase();
+        if (!q) return slashItems.slice();
+        const scored = [];
+        for (const item of slashItems) {
+            const label = item.label.toLowerCase();
+            let score = -1;
+            if (label === q) score = 200;
+            else if (label.startsWith(q)) score = 120;
+            else if (item.keywords.some((k) => k.startsWith(q))) score = 90;
+            else if (label.includes(q)) score = 60;
+            else if (item.keywords.some((k) => k.includes(q))) score = 40;
+            if (score >= 0) scored.push({ item, score });
+        }
+        scored.sort((a, b) => b.score - a.score);
+        return scored.map((s) => s.item);
+    }
+
+    function renderSlashFooter() {
+        const q = (slashMenu.query || '').trim();
+        const total = slashItems.length;
+        const shown = slashMenu.filtered.length;
+        const footer = slashMenu.footerEl;
+        if (q && shown) {
+            footer.textContent = shown + ' of ' + total;
+            footer.hidden = false;
+        } else {
+            footer.hidden = true;
+            footer.textContent = '';
+        }
+    }
+
+    function renderSlashMenu() {
+        const list = slashMenu.listEl;
+        if (!slashMenu.filtered.length) {
+            list.innerHTML = '<div class="slash-menu-empty">No matches</div>';
+            renderSlashFooter();
+            return;
+        }
+        list.innerHTML = '';
+        slashMenu.filtered.forEach((item, idx) => {
+            const row = document.createElement('div');
+            row.className = 'slash-menu-item' + (idx === slashMenu.selectedIndex ? ' is-active' : '');
+            row.setAttribute('role', 'option');
+            row.dataset.id = item.id;
+            const icon = document.createElement('div');
+            icon.className = 'slash-menu-icon';
+            icon.textContent = item.icon;
+            const text = document.createElement('div');
+            text.className = 'slash-menu-text';
+            const label = document.createElement('div');
+            label.className = 'slash-menu-label';
+            label.textContent = item.label;
+            const desc = document.createElement('div');
+            desc.className = 'slash-menu-desc';
+            desc.textContent = item.desc;
+            text.appendChild(label);
+            text.appendChild(desc);
+            row.appendChild(icon);
+            row.appendChild(text);
+            row.addEventListener('mouseenter', () => {
+                if (slashMenu.selectedIndex === idx) return;
+                slashMenu.selectedIndex = idx;
+                updateSlashHighlight();
+            });
+            row.addEventListener('click', (e) => {
+                e.preventDefault();
+                slashMenu.selectedIndex = idx;
+                applySlashSelection();
+            });
+            list.appendChild(row);
+        });
+        renderSlashFooter();
+    }
+
+    function updateSlashHighlight() {
+        const items = slashMenu.listEl.querySelectorAll('.slash-menu-item');
+        items.forEach((it, idx) => it.classList.toggle('is-active', idx === slashMenu.selectedIndex));
+        const active = items[slashMenu.selectedIndex];
+        if (active) active.scrollIntoView({ block: 'nearest' });
+    }
+
+    function positionSlashMenu() {
+        const el = slashMenu.el;
+        const bounds = quill.getBounds(slashMenu.startIndex);
+        const editorRect = quill.root.getBoundingClientRect();
+        const prevVis = el.style.visibility;
+        el.style.visibility = 'hidden';
+        el.hidden = false;
+        const mw = el.offsetWidth;
+        const mh = el.offsetHeight;
+        let top = editorRect.top + window.scrollY + bounds.top - mh - 10;
+        let left = editorRect.left + window.scrollX + bounds.left;
+        if (top < window.scrollY + 8) {
+            top = editorRect.top + window.scrollY + bounds.bottom + 10;
+        }
+        const maxLeft = window.scrollX + window.innerWidth - mw - 12;
+        if (left > maxLeft) left = maxLeft;
+        if (left < window.scrollX + 8) left = window.scrollX + 8;
+        el.style.top = top + 'px';
+        el.style.left = left + 'px';
+        el.style.visibility = prevVis;
+    }
+
+    function markSlashLine() {
+        const [line] = quill.getLine(slashMenu.startIndex);
+        if (!line || !line.domNode) return;
+        unmarkSlashLine(line.domNode);
+        line.domNode.classList.add('is-slash-active');
+        line.domNode.setAttribute('data-slash-query', slashMenu.query || '');
+    }
+    function unmarkSlashLine(except) {
+        quill.root.querySelectorAll('.is-slash-active').forEach((el) => {
+            if (el === except) return;
+            el.classList.remove('is-slash-active');
+            el.removeAttribute('data-slash-query');
+        });
+    }
+
+    function openSlashMenu(startIndex) {
+        slashMenu.open = true;
+        slashMenu.startIndex = startIndex;
+        slashMenu.query = '';
+        slashMenu.selectedIndex = 0;
+        slashMenu.filtered = filterSlashItems('');
+        renderSlashMenu();
+        markSlashLine();
+        requestAnimationFrame(() => {
+            positionSlashMenu();
+            slashMenu.el.classList.add('show');
+        });
+    }
+
+    function updateSlashMenuQuery(query) {
+        const prevId = slashMenu.filtered[slashMenu.selectedIndex] && slashMenu.filtered[slashMenu.selectedIndex].id;
+        slashMenu.query = query;
+        slashMenu.filtered = filterSlashItems(query);
+        const newIdx = slashMenu.filtered.findIndex((i) => i.id === prevId);
+        slashMenu.selectedIndex = newIdx >= 0 ? newIdx : 0;
+        renderSlashMenu();
+        markSlashLine();
+        positionSlashMenu();
+    }
+
+    function closeSlashMenu() {
+        if (!slashMenu.open) return;
+        slashMenu.open = false;
+        slashMenu.el.classList.remove('show');
+        unmarkSlashLine();
+        const el = slashMenu.el;
+        setTimeout(() => { if (!slashMenu.open) el.hidden = true; }, 160);
+    }
+
+    function clearLineFormats(index) {
+        ['header', 'blockquote', 'code-block', 'list', 'caption'].forEach((n) => {
+            quill.formatLine(index, 1, n, false, 'user');
+        });
+    }
+
+    function applySlashSelection() {
+        if (!slashMenu.open || !slashMenu.filtered.length) return;
+        const item = slashMenu.filtered[slashMenu.selectedIndex];
+        const start = slashMenu.startIndex;
+        const length = 1 + slashMenu.query.length;
+        closeSlashMenu();
+        withCleanupSuppressed(() => {
+            quill.deleteText(start, length, 'user');
+            if (item.id === 'divider') {
+                quill.insertEmbed(start, 'divider', true, 'user');
+                quill.setSelection(start + 1, 0, 'user');
+                return;
+            }
+            clearLineFormats(start);
+            switch (item.id) {
+                case 'h1': quill.formatLine(start, 1, 'header', 1, 'user'); break;
+                case 'h2': quill.formatLine(start, 1, 'header', 2, 'user'); break;
+                case 'h3': quill.formatLine(start, 1, 'header', 3, 'user'); break;
+                case 'body': break;
+                case 'bullet': quill.formatLine(start, 1, 'list', 'bullet', 'user'); break;
+                case 'ordered': quill.formatLine(start, 1, 'list', 'ordered', 'user'); break;
+                case 'quote': quill.formatLine(start, 1, 'blockquote', true, 'user'); break;
+                case 'code': quill.formatLine(start, 1, 'code-block', true, 'user'); break;
+            }
+            quill.setSelection(start, 0, 'user');
+            if (item.id === 'inline-code') {
+                quill.format('code', true, 'user');
+            }
+        });
+    }
+
+    buildSlashMenu();
+
+    quill.on('text-change', (delta, _oldDelta, source) => {
+        if (source !== 'user') return;
+        if (slashMenu.open) {
+            const [line] = quill.getLine(slashMenu.startIndex);
+            if (!line || !line.domNode) { closeSlashMenu(); return; }
+            const lineStart = quill.getIndex(line);
+            const text = line.domNode.textContent || '';
+            if (lineStart !== slashMenu.startIndex || text[0] !== '/' || /\n/.test(text)) {
+                closeSlashMenu();
+                return;
+            }
+            updateSlashMenuQuery(text.slice(1));
+            return;
+        }
+        let pos = 0;
+        for (const op of delta.ops) {
+            if (op.retain != null) { pos += op.retain; continue; }
+            if (typeof op.insert === 'string') {
+                if (op.insert === '/') {
+                    const [line] = quill.getLine(pos);
+                    if (line && line.domNode && !line.domNode.classList.contains('caption')) {
+                        const lineStart = quill.getIndex(line);
+                        const text = line.domNode.textContent || '';
+                        if (pos === lineStart && text === '/') {
+                            openSlashMenu(pos);
+                            break;
+                        }
+                    }
+                }
+                pos += op.insert.length;
+            } else if (op.insert) {
+                pos += 1;
+            }
+        }
+    });
+
+    quill.on('selection-change', (range) => {
+        if (!slashMenu.open) return;
+        if (!range) { closeSlashMenu(); return; }
+        const [line] = quill.getLine(slashMenu.startIndex);
+        if (!line) { closeSlashMenu(); return; }
+        const lineStart = quill.getIndex(line);
+        const lineEnd = lineStart + line.length();
+        if (range.index < slashMenu.startIndex || range.index > lineEnd) closeSlashMenu();
+    });
+
+    function exitInlineCodeIfBoundary(e) {
+        const range = quill.getSelection();
+        if (!range || range.length !== 0) return false;
+        const fmt = quill.getFormat(range);
+        if (!fmt.code) return false;
+        const ahead = quill.getFormat(range.index, 1);
+        if (ahead && ahead.code) return false;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        quill.format('code', false, 'user');
+        return true;
+    }
+
+    quill.root.addEventListener('keydown', (e) => {
+        if (!slashMenu.open) {
+            if (e.key === 'ArrowRight' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+                exitInlineCodeIfBoundary(e);
+            }
+            return;
+        }
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (!slashMenu.filtered.length) return;
+            slashMenu.selectedIndex = (slashMenu.selectedIndex + 1) % slashMenu.filtered.length;
+            updateSlashHighlight();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (!slashMenu.filtered.length) return;
+            slashMenu.selectedIndex = (slashMenu.selectedIndex - 1 + slashMenu.filtered.length) % slashMenu.filtered.length;
+            updateSlashHighlight();
+        } else if (e.key === 'Enter') {
+            if (!slashMenu.filtered.length) { closeSlashMenu(); return; }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            applySlashSelection();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            closeSlashMenu();
+        } else if (e.key === 'Tab') {
+            if (!slashMenu.filtered.length) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            applySlashSelection();
+        }
+    }, true);
+
+    document.addEventListener('mousedown', (e) => {
+        if (!slashMenu.open) return;
+        if (slashMenu.el.contains(e.target)) return;
+        closeSlashMenu();
+    });
+
+    window.addEventListener('scroll', () => { if (slashMenu.open) positionSlashMenu(); }, true);
+    window.addEventListener('resize', () => { if (slashMenu.open) positionSlashMenu(); });
 
     if (document.body.dataset.mode === 'edit') {
         setTimeout(() => {
