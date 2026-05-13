@@ -1,5 +1,5 @@
 #title {
-    font-family: 'Lora', serif;
+    font-family: 'New York', ui-serif, 'Iowan Old Style', Georgia, serif;
     font-size: 2rem;
     font-weight: 500;
     line-height: 1.25;
@@ -29,7 +29,7 @@
 
 .ql-container.ql-bubble {
     border: none;
-    font-family: 'Lora', serif;
+    font-family: 'New York', ui-serif, 'Iowan Old Style', Georgia, serif;
     font-size: 1.0625rem;
 }
 
@@ -46,13 +46,13 @@
     right: 0;
     color: var(--text-faint);
     font-style: normal;
-    font-family: 'Lora', serif;
+    font-family: 'New York', ui-serif, 'Iowan Old Style', Georgia, serif;
 }
 
 .ql-editor h1,
 .ql-editor h2,
 .ql-editor h3 {
-    font-family: 'Lora', serif;
+    font-family: 'New York', ui-serif, 'Iowan Old Style', Georgia, serif;
     color: var(--text);
     letter-spacing: -0.012em;
 }
@@ -140,6 +140,88 @@
 }
 .ql-editor img.is-selected {
     box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--accent-soft);
+}
+
+.ql-editor sup.footnote-marker {
+    display: inline-block;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72em;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0 1px;
+    user-select: none;
+    vertical-align: super;
+    line-height: 0;
+    padding: 0 2px;
+    border-radius: 3px;
+    transition: background 120ms ease;
+}
+.ql-editor sup.footnote-marker::before {
+    content: attr(data-num);
+}
+.ql-editor sup.footnote-marker:hover {
+    background: var(--bubble-hover);
+}
+
+.footnote-popover {
+    position: absolute;
+    background: var(--bubble-bg);
+    border: 0.5px solid var(--bubble-border);
+    border-radius: 12px;
+    box-shadow: var(--bubble-shadow);
+    padding: 8px;
+    z-index: 250;
+    width: 280px;
+    box-sizing: border-box;
+}
+.footnote-popover .footnote-text {
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    background: var(--bubble-hover);
+    color: var(--bubble-text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 8px 10px;
+    border-radius: 8px;
+    resize: none;
+    outline: none;
+}
+.footnote-popover .footnote-text::placeholder {
+    color: var(--bubble-text-dim);
+}
+.footnote-popover .footnote-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    gap: 4px;
+}
+.footnote-popover .footnote-actions button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 120ms ease, filter 120ms ease;
+}
+.footnote-popover .footnote-delete {
+    background: transparent;
+    color: var(--bubble-text-dim);
+}
+.footnote-popover .footnote-delete:hover {
+    background: var(--bubble-hover);
+    color: var(--bubble-text);
+}
+.footnote-popover .footnote-save {
+    background: var(--bubble-active);
+    color: var(--bubble-active-icon);
+}
+.footnote-popover .footnote-save:hover {
+    filter: brightness(1.08);
 }
 
 .ql-editor p.caption {

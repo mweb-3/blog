@@ -113,7 +113,7 @@ body {
     transition: background 200ms ease, color 200ms ease;
 }
 h1 {
-    font-family: 'Lora', serif;
+    font-family: 'New York', ui-serif, 'Iowan Old Style', Georgia, serif;
     font-weight: 400;
     margin-bottom: 0.25rem;
     color: var(--text);
@@ -182,7 +182,7 @@ button:active {
     background-color: var(--bg-card-active);
 }
 .post h2 {
-    font-family: 'Lora', serif;
+    font-family: 'New York', ui-serif, 'Iowan Old Style', Georgia, serif;
     font-weight: 500;
     font-size: 1.1rem;
     margin: 0 0 0.3rem;

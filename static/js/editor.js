@@ -1,6 +1,7 @@
 (function () {
     const Block = Quill.import('blots/block');
     const BlockEmbed = Quill.import('blots/block/embed');
+    const Embed = Quill.import('blots/embed');
 
     class CaptionBlock extends Block {}
     CaptionBlock.blotName = 'caption';
@@ -12,6 +13,22 @@
     DividerBlot.blotName = 'divider';
     DividerBlot.tagName = 'HR';
     Quill.register(DividerBlot, true);
+
+    class FootnoteBlot extends Embed {
+        static create(value) {
+            const node = super.create();
+            node.setAttribute('data-note', value || '');
+            node.setAttribute('contenteditable', 'false');
+            return node;
+        }
+        static value(node) {
+            return node.getAttribute('data-note') || '';
+        }
+    }
+    FootnoteBlot.blotName = 'footnote';
+    FootnoteBlot.tagName = 'SUP';
+    FootnoteBlot.className = 'footnote-marker';
+    Quill.register(FootnoteBlot, true);
 
     const toolbarOptions = [
         ['bold', 'italic', 'underline', 'strike'],
@@ -61,28 +78,36 @@
         document.getElementById('image-picker').click();
     };
 
+    const editorEl = document.getElementById('editor');
+    const initialHTML = editorEl.innerHTML;
+    editorEl.innerHTML = '';
+
     const quill = new Quill('#editor', {
         theme: 'bubble',
         placeholder: 'Start writing…',
         modules: {
             toolbar: toolbarOptions,
-            keyboard: {
-                bindings: {
-                    customStrike: { key: 'X', shortKey: true, shiftKey: true, handler: toggleInline('strike') },
-                    customLink: { key: 'K', shortKey: true, handler: triggerLink },
-                    customH1: { key: '1', shortKey: true, altKey: true, handler: toggleHeader(1) },
-                    customH2: { key: '2', shortKey: true, altKey: true, handler: toggleHeader(2) },
-                    customH3: { key: '3', shortKey: true, altKey: true, handler: toggleHeader(3) },
-                    customBody: { key: '0', shortKey: true, altKey: true, handler: setBody },
-                    customBullet: { key: '8', shortKey: true, shiftKey: true, handler: toggleList('bullet') },
-                    customOrdered: { key: '7', shortKey: true, shiftKey: true, handler: toggleList('ordered') },
-                    customQuote: { key: 'Q', shortKey: true, shiftKey: true, handler: toggleQuote },
-                    customCode: { key: 'E', shortKey: true, handler: toggleInline('code') },
-                    customImage: { key: 'I', shortKey: true, shiftKey: true, handler: triggerImage },
-                },
-            },
         },
     });
+
+    const Delta = Quill.import('delta');
+    quill.clipboard.addMatcher('P', (node, delta) => {
+        if (node.classList && node.classList.contains('caption')) {
+            return delta.compose(new Delta().retain(delta.length(), { caption: true }));
+        }
+        return delta;
+    });
+    quill.clipboard.addMatcher('HR', () => new Delta().insert({ divider: true }));
+    quill.clipboard.addMatcher('SUP', (node, delta) => {
+        if (node.classList && node.classList.contains('footnote-marker')) {
+            return new Delta().insert({ footnote: node.getAttribute('data-note') || '' });
+        }
+        return delta;
+    });
+
+    if (initialHTML && initialHTML.trim()) {
+        quill.setContents(quill.clipboard.convert({ html: initialHTML }), 'silent');
+    }
 
     let suppressCleanup = false;
     function withCleanupSuppressed(fn) {
@@ -380,6 +405,194 @@
             }
         });
     }
+
+    const footnotePopover = document.createElement('div');
+    footnotePopover.className = 'footnote-popover';
+    footnotePopover.hidden = true;
+    footnotePopover.innerHTML =
+        '<textarea class="footnote-text" rows="3" placeholder="Footnote…"></textarea>' +
+        '<div class="footnote-actions">' +
+        '<button type="button" class="footnote-delete">Delete</button>' +
+        '<button type="button" class="footnote-save">Done</button>' +
+        '</div>';
+    document.body.appendChild(footnotePopover);
+    const footnoteText = footnotePopover.querySelector('.footnote-text');
+    let activeMarker = null;
+
+    function positionPopover(rect) {
+        const w = 280;
+        footnotePopover.style.width = w + 'px';
+        let left = rect.left + window.scrollX;
+        const maxLeft = window.scrollX + window.innerWidth - w - 8;
+        if (left > maxLeft) left = maxLeft;
+        if (left < window.scrollX + 8) left = window.scrollX + 8;
+        footnotePopover.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+        footnotePopover.style.left = left + 'px';
+    }
+
+    function openFootnoteEditor(marker) {
+        activeMarker = marker;
+        footnoteText.value = marker.getAttribute('data-note') || '';
+        footnotePopover.hidden = false;
+        positionPopover(marker.getBoundingClientRect());
+        setTimeout(() => { footnoteText.focus(); footnoteText.select(); }, 0);
+    }
+
+    function removeMarker(marker) {
+        try {
+            const blot = Quill.find(marker);
+            if (blot) {
+                const idx = quill.getIndex(blot);
+                quill.deleteText(idx, 1, 'user');
+                return;
+            }
+        } catch (_) {}
+        marker.remove();
+    }
+
+    function closeFootnoteEditor(saveOnClose) {
+        if (!activeMarker) {
+            footnotePopover.hidden = true;
+            return;
+        }
+        const marker = activeMarker;
+        activeMarker = null;
+        if (saveOnClose) {
+            const text = footnoteText.value.trim();
+            if (text) {
+                marker.setAttribute('data-note', text);
+            } else {
+                removeMarker(marker);
+            }
+        } else if (!(marker.getAttribute('data-note') || '').trim()) {
+            removeMarker(marker);
+        }
+        footnotePopover.hidden = true;
+        renumberFootnotes();
+    }
+
+    footnotePopover.querySelector('.footnote-save').addEventListener('click', () => closeFootnoteEditor(true));
+    footnotePopover.querySelector('.footnote-delete').addEventListener('click', () => {
+        if (!activeMarker) return;
+        const marker = activeMarker;
+        activeMarker = null;
+        removeMarker(marker);
+        footnotePopover.hidden = true;
+        renumberFootnotes();
+    });
+    footnoteText.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeFootnoteEditor(true);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closeFootnoteEditor(false);
+        }
+    });
+
+    function insertFootnote() {
+        const range = quill.getSelection(true);
+        if (!range) return;
+        const tempId = '__pending_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        quill.insertEmbed(range.index, 'footnote', tempId, 'user');
+        quill.setSelection(range.index + 1, 0, 'user');
+        setTimeout(() => {
+            const sel = 'sup.footnote-marker[data-note="' + tempId + '"]';
+            const marker = quill.root.querySelector(sel);
+            if (marker) {
+                marker.setAttribute('data-note', '');
+                renumberFootnotes();
+                openFootnoteEditor(marker);
+            }
+        }, 0);
+    }
+
+    function renumberFootnotes() {
+        const markers = quill.root.querySelectorAll('sup.footnote-marker');
+        markers.forEach((m, i) => { m.setAttribute('data-num', String(i + 1)); });
+    }
+
+    quill.root.addEventListener('mousedown', (e) => {
+        const marker = e.target.closest && e.target.closest('sup.footnote-marker');
+        if (!marker) return;
+        e.preventDefault();
+        e.stopPropagation();
+        openFootnoteEditor(marker);
+    });
+
+    quill.root.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && !sel.isCollapsed && quill.root.contains(sel.anchorNode)) {
+            const r = sel.getRangeAt(0);
+            const rect = r.getBoundingClientRect();
+            if (e.clientX >= rect.left - 4 && e.clientX <= rect.right + 4 &&
+                e.clientY >= rect.top - 4 && e.clientY <= rect.bottom + 4) {
+                return;
+            }
+        }
+
+        let domRange = null;
+        if (document.caretRangeFromPoint) {
+            domRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+        } else if (document.caretPositionFromPoint) {
+            const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+            if (pos) {
+                domRange = document.createRange();
+                domRange.setStart(pos.offsetNode, pos.offset);
+                domRange.collapse(true);
+            }
+        }
+        if (!domRange) return;
+
+        const node = domRange.startContainer;
+        if (!node || node.nodeType !== Node.TEXT_NODE) return;
+        if (!quill.root.contains(node)) return;
+
+        const text = node.textContent || '';
+        let start = domRange.startOffset;
+        let end = start;
+        const isWord = (c) => !!c && /[\w'’\-]/.test(c);
+        while (start > 0 && isWord(text[start - 1])) start--;
+        while (end < text.length && isWord(text[end])) end++;
+        if (start === end) return;
+
+        let blot;
+        try { blot = Quill.find(node, true); } catch (_) { return; }
+        if (!blot) return;
+        const blotIdx = quill.getIndex(blot);
+        quill.setSelection(blotIdx + start, end - start, 'user');
+    });
+
+    document.addEventListener('mousedown', (e) => {
+        if (footnotePopover.hidden) return;
+        if (footnotePopover.contains(e.target)) return;
+        if (e.target.closest && e.target.closest('sup.footnote-marker')) return;
+        closeFootnoteEditor(false);
+    });
+
+    quill.on('text-change', renumberFootnotes);
+    renumberFootnotes();
+
+    [
+        [{ key: 'X', shortKey: true, shiftKey: true }, toggleInline('strike')],
+        [{ key: 'K', shortKey: true }, triggerLink],
+        [{ key: '1', shortKey: true, altKey: true }, toggleHeader(1)],
+        [{ key: '2', shortKey: true, altKey: true }, toggleHeader(2)],
+        [{ key: '3', shortKey: true, altKey: true }, toggleHeader(3)],
+        [{ key: '0', shortKey: true, altKey: true }, setBody],
+        [{ key: '8', shortKey: true, shiftKey: true }, toggleList('bullet')],
+        [{ key: '7', shortKey: true, shiftKey: true }, toggleList('ordered')],
+        [{ key: 'Q', shortKey: true, shiftKey: true }, toggleQuote],
+        [{ key: 'E', shortKey: true }, toggleInline('code')],
+        [{ key: 'I', shortKey: true, shiftKey: true }, triggerImage],
+        [{ key: 'N', shortKey: true, altKey: true }, function () { insertFootnote(); }],
+    ].forEach(([binding, handler]) => {
+        quill.keyboard.addBinding(binding, handler);
+    });
 
     const tooltipMap = [
         ['.ql-bold', 'Bold', '⌘B'],
