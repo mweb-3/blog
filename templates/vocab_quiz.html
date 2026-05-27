@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 34 — Vocabulary Quiz</title>
+<style>
+  @font-face {
+    font-family: 'NewYorkFallback';
+    src: local('New York'), local('NewYork'), local('Georgia');
+  }
+  :root {
+    --ink: #0a0a0a;
+    --paper: #fafaf7;
+    --rule: #1a1a1a;
+    --muted: #6b6b6b;
+    --soft: #ededea;
+    --wrong: #1a1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'New York', NewYorkFallback, Georgia, 'Times New Roman', serif;
+    font-feature-settings: "liga", "kern", "onum";
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 80px 40px 120px;
+  }
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 24px;
+    margin-bottom: 56px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-weight: 400;
+    font-size: 36px;
+    letter-spacing: -0.01em;
+    font-style: italic;
+  }
+  h1 small {
+    font-style: normal;
+    font-size: 36px;
+  }
+  nav.sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-bottom: 64px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--soft);
+  }
+  nav.sections button {
+    background: none;
+    border: none;
+    font: inherit;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  nav.sections button:hover { color: var(--ink); }
+  nav.sections button.active {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+
+  .stage {
+    min-height: 480px;
+  }
+
+  .start-screen {
+    text-align: left;
+    padding: 32px 0;
+  }
+  .start-screen p {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .start-screen .meta {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  button.primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font: inherit;
+    font-size: 15px;
+    padding: 14px 28px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s;
+  }
+  button.primary:hover { background: #2a2a2a; }
+  button.ghost {
+    background: none;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    font: inherit;
+    font-size: 14px;
+    padding: 10px 20px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+  }
+  button.ghost:hover { background: var(--ink); color: var(--paper); }
+
+  .progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 48px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .progress-bar {
+    height: 1px;
+    background: var(--soft);
+    margin-bottom: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-bar::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    height: 1px;
+    background: var(--ink);
+    width: var(--pct, 0%);
+    transition: width 0.3s ease;
+  }
+
+  .question {
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .word {
+    font-size: 56px;
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 8px;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+  }
+  .word-meta {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+
+  .choices {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--soft);
+  }
+  .choice {
+    border-bottom: 1px solid var(--soft);
+    cursor: pointer;
+    padding: 18px 8px 18px 56px;
+    position: relative;
+    font-size: 17px;
+    transition: background 0.12s, padding-left 0.2s;
+  }
+  .choice:hover {
+    background: var(--soft);
+    padding-left: 64px;
+  }
+  .choice .letter {
+    position: absolute;
+    left: 8px;
+    top: 18px;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    font-variant: small-caps;
+  }
+  .choice.correct {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .choice.correct .letter { color: var(--paper); }
+  .choice.incorrect {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+  .choice.disabled {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .feedback {
+    margin-top: 48px;
+    padding: 28px 32px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+  }
+  .feedback .label {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .feedback .mnemonic-title {
+    font-style: italic;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .feedback p {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .feedback .next-row {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .results h2 {
+    font-style: italic;
+    font-weight: 400;
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .score-line {
+    font-size: 64px;
+    letter-spacing: -0.02em;
+    margin: 24px 0 8px;
+  }
+  .score-line .denom { color: var(--muted); }
+  .results .summary {
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 56px;
+  }
+  .missed-section h3 {
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 12px;
+  }
+  .missed-item {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--soft);
+  }
+  .missed-item:last-child { border-bottom: none; }
+  .missed-word {
+    font-size: 28px;
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+  .missed-def {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  .missed-mnemonic {
+    font-size: 15px;
+    color: var(--muted);
+    font-style: italic;
+    padding-left: 16px;
+    border-left: 1px solid var(--ink);
+  }
+  .results-actions {
+    margin-top: 56px;
+    display: flex;
+    gap: 12px;
+  }
+
+  footer {
+    margin-top: 96px;
+    padding-top: 24px;
+    border-top: 1px solid var(--soft);
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 48px 24px 80px; }
+    h1, h1 small { font-size: 28px; }
+    .word { font-size: 40px; }
+    .score-line { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="eyebrow">Latin · Chapter 34</div>
+    <h1><small>Running</small> <em>Core</em> <small>Vocab</small></h1>
+  </div>
+  <div class="eyebrow" id="section-label">— Choose a section —</div>
+</header>
+
+<nav class="sections" id="nav"></nav>
+
+<div class="stage" id="stage"></div>
+
+<footer>Multiple Choice · Self-Paced · No Time Limit</footer>
+
+<script>
+// --- DATA -----------------------------------------------------------------
+// Each entry: { w: word, d: definition, m: mnemonic }
+
+const SECTIONS = {
+  "Running List": [
+    { w: "-que", d: "and", m: "Tacked on the END of a word — like a 'q' tail that means 'and one more.'" },
+    { w: "sui / sibi / se", d: "himself, herself, itself, themselves (reflexive)", m: "'Suicide' = 'killing of SE' — the self." },
+    { w: "atque, ac", d: "and", m: "Sounds like 'at-kay' — at THIS time AND that time." },
+    { w: "aurum", d: "gold", m: "Au is the chemical symbol for gold (from aurum)." },
+    { w: "campus", d: "plain, field, open country, level place", m: "A college CAMPUS is a wide-open field." },
+    { w: "cornu", d: "horn; beak, claw; wing of an army", m: "Unicorn has one CORNU — a horn." },
+    { w: "dico", d: "to say, speak, utter", m: "DICTate, DICTionary — all from 'speaking.'" },
+    { w: "do, dare, dedi", d: "to give, hand over", m: "'I DARE you' to give it back — do/dare." },
+    { w: "ego", d: "I, me", m: "Freud's EGO is the 'I' of the mind." },
+    { w: "eo, ire", d: "to go", m: "An ITINERary plans where you'll GO." },
+    { w: "et", d: "and; also", m: "ET phone home — 'AND' phone home." },
+    { w: "etiam", d: "now too, yet, even, still", m: "'Eat-yam' — yes, AND ALSO have a yam." },
+    { w: "ferrum", d: "iron", m: "FERRous metals contain iron." },
+    { w: "fio, fieri", d: "to happen, become, be done", m: "FIat — let it BECOME / let it be done." },
+    { w: "habeo", d: "to have, hold", m: "HABit is something you HAVE." },
+    { w: "hic, haec, hoc", d: "this", m: "'HIC!' — pointing right HERE at THIS." },
+    { w: "iam", d: "now, already", m: "'I AM here NOW' — iam." },
+    { w: "ille, illa, illud", d: "that", m: "Spanish 'él' came from ille — THAT one over there." },
+    { w: "impono", d: "to place upon, set on", m: "IMPOSE = place a burden ON someone." },
+    { w: "in (abl.)", d: "in, on", m: "Stationary IN — already inside." },
+    { w: "in (acc.)", d: "into, to, onto, against", m: "Motion INTO — going in." },
+    { w: "inter", d: "between, among", m: "INTERnet, INTERmission — BETWEEN things." },
+    { w: "ipse, -a, -um", d: "self, in person, himself", m: "'Ipso facto' = by the fact ITSELF." },
+    { w: "is, ea, id", d: "he, she, it; this, that", m: "ID — that THING, IT." },
+    { w: "mons, montis", d: "mountain", m: "MOUNT Everest — a mons." },
+    { w: "nam, namque", d: "for, you see", m: "'NAMely...' — here's the reason, you see." },
+    { w: "nec, neque", d: "and not, nor", m: "NEgative + 'and' — and NOT." },
+    { w: "nescio", d: "to not know", m: "NE (not) + scio (know) = don't know. 'Nescient.'" },
+    { w: "non", d: "not", m: "NON-stop, NON-sense — straight NOT." },
+    { w: "noster", d: "our, ours", m: "Pater NOSTER — OUR father." },
+    { w: "nullus", d: "none, no, not any", m: "NULL = nothing, none." },
+    { w: "omnis, -e", d: "all, every", m: "OMNIvore eats EVERYthing; OMNIscient knows ALL." },
+    { w: "ops, opis", d: "strength, help; (pl.) wealth, resources", m: "OPulent = full of wealth (opes)." },
+    { w: "per", d: "through, across, along", m: "PERforate = pierce THROUGH." },
+    { w: "possum, posse", d: "to be able, can", m: "POSSible — what you CAN do." },
+    { w: "primus", d: "first", m: "PRIMary, PRIMe — FIRST." },
+    { w: "quaero", d: "to seek, look for", m: "QUERy and inQUIRY = seeking an answer." },
+    { w: "qui, quae, quod", d: "who, which, that", m: "Quid pro QUO — that for WHICH." },
+    { w: "quod", d: "because, but, though", m: "QUOD erat demonstrandum — 'BECAUSE/THAT which was to be shown.'" },
+    { w: "quoque", d: "also, too", m: "'kwo-kway' — me TOO, me TOO." },
+    { w: "sed", d: "but", m: "Sounds like 'said' — '...BUT she said...'" },
+    { w: "sentio", d: "to feel, perceive", m: "SENTIment, SENSation — what you FEEL." },
+    { w: "sine", d: "without (+abl.)", m: "SINEcure = a job WITHOUT care/work." },
+    { w: "soleo", d: "to be accustomed", m: "Sounds like 'solely' — what you SOLELY do; it's your habit." },
+    { w: "sum, esse, fui", d: "to be", m: "ESSEnce — what something IS." },
+    { w: "terra", d: "earth, land", m: "TERRain, TERRitory, TERRestrial." },
+    { w: "tu, tui", d: "you (singular)", m: "TU is just 'YOU' in modern Romance languages too." },
+    { w: "ut + subj.", d: "that, so that", m: "'UT' = the bridge to a purpose: SO THAT." },
+    { w: "ventus", d: "wind", m: "VENTilate — let the WIND through." },
+    { w: "vero", d: "in truth, certainly", m: "VERIfy, VERY — what's TRUE." }
+  ],
+
+  "Part A": [
+    { w: "(ig)notus", d: "(un)known", m: "NOTed = known. IGnotus = NOT known." },
+    { w: "(im)mortalis", d: "(im)mortal, (un)dying", m: "IMMORTAL — straight English." },
+    { w: "adhuc", d: "until now, still", m: "'AD-hook' — hooked on STILL going." },
+    { w: "altus", d: "high, lofty; deep", m: "ALTitude — how HIGH you are." },
+    { w: "aura", d: "breeze, air in motion", m: "An AURA is the air around you." },
+    { w: "bene", d: "well", m: "BENEfit, BENEficial — something done WELL/good." },
+    { w: "cingo", d: "to surround, go around", m: "Pre-CINCT = surrounded area; cingulate = belt." },
+    { w: "debeo", d: "to owe; ought", m: "DEBT — what you OWE." },
+    { w: "descendo", d: "to descend, go down", m: "DESCEND — straight English." },
+    { w: "dives", d: "rich", m: "A 'DIVES' bar may be cheap, but the man Dives in scripture was RICH." },
+    { w: "flecto", d: "to bend, curve", m: "FLEX, deFLECT, reFLECT — all bending." },
+    { w: "fluctus", d: "wave, surge, tide", m: "FLUCTuate — rise and fall like waves." },
+    { w: "gens, gentis", d: "race, clan, house", m: "GENealogy = study of your CLAN; GENtile = of a race." },
+    { w: "litus", d: "seashore, beach", m: "Sounds like 'lee-tus' — the LITTLE strip by the sea." },
+    { w: "longus", d: "long", m: "LONG — straight English." },
+    { w: "lumen", d: "light, daylight", m: "ILLUMINate, LUMINous — full of LIGHT." },
+    { w: "malum", d: "evil, misfortune", m: "MALice, MALevolent — full of EVIL." },
+    { w: "miles, militis", d: "soldier", m: "MILITary, MILItia — SOLDIERS." },
+    { w: "mollis", d: "tender, soft, gentle", m: "MOLLify — to soften; MOLLusks are soft." },
+    { w: "moveo", d: "to move", m: "MOVE — straight English." },
+    { w: "nondum", d: "not yet", m: "Non + dum — NOT yet at the end." },
+    { w: "nosco", d: "to come to know, learn", m: "Cognosco, reCOGNIZE — coming to KNOW." },
+    { w: "oppidum", d: "town", m: "Sounds like 'opp-i-dum' — the OPP's town." },
+    { w: "orbis", d: "ring, circle, globe", m: "ORBit — a circle around something." },
+    { w: "otium", d: "leisure, peace, quiet", m: "Negotium = NOT leisure = business. So OTIUM is REST." },
+    { w: "per", d: "through, across, along (+acc.)", m: "PERforate, PERmeate — straight THROUGH." },
+    { w: "posco", d: "to demand, request", m: "Sounds like 'POSH-ko' — a posh person DEMANDS service." },
+    { w: "prius", d: "sooner, first, previously", m: "PRIor, PRImary — what came FIRST." },
+    { w: "sol, solis", d: "sun", m: "SOLar — of the SUN." },
+    { w: "sto, stare", d: "to stand", m: "STAtue, STAtionary, STAble — STANDing still." },
+    { w: "suus", d: "his own, her own, their own", m: "Reflexive possessive — owned by the subject itSELF (sui)." },
+    { w: "tantum", d: "so much; only, merely", m: "Sounds like 'tantamount' — equal in such an AMOUNT." },
+    { w: "tellus, telluris", d: "earth, land, globe", m: "TELLuric currents flow through the EARTH." },
+    { w: "ullus", d: "any, anyone", m: "Negate it: nULLus = NONE. So ullus = ANY." },
+    { w: "umbra", d: "shade, shadow, ghost", m: "An UMBRElla makes SHADE." },
+    { w: "unda", d: "wave, billow", m: "UNDUlate — to move in WAVES." },
+    { w: "usus", d: "use, practice", m: "USE — straight English." }
+  ],
+
+  "Part B": [
+    { w: "aut", d: "or", m: "Sounds like 'OUT' — this OR that, in or OUT." },
+    { w: "bellum", d: "war", m: "BELLIcose, antebellum (before the WAR)." },
+    { w: "benignus", d: "kind, mild, favorable", m: "BENIGN — kind and harmless." },
+    { w: "caedes", d: "killing, slaughter, carnage", m: "homiCIDE, suiCIDE — all from caedes." },
+    { w: "gratus", d: "beloved, dear, acceptable", m: "GRATEful for someone DEAR; inGRATiate." },
+    { w: "parens", d: "parent (father or mother)", m: "PARENT — straight English." },
+    { w: "parum", d: "too little, not enough", m: "Sounds like 'PAR-um' — UNDER par, too little." },
+    { w: "sacer", d: "sacred, dedicated", m: "SACRED — straight English." },
+    { w: "sequor", d: "to follow, come after", m: "SEQUence, conSEQUEnce — what FOLLOWS." },
+    { w: "super", d: "above, over, on top", m: "SUPERvise = look OVER from above." },
+    { w: "tamquam", d: "as much as, just as", m: "'Tam-kwam' — twin words, AS MUCH AS one another." },
+    { w: "vita", d: "life", m: "VITAl, VITAmins — needed for LIFE." },
+    { w: "vivo", d: "to live, be alive", m: "VIVid, reVIVE, surVIVE — all about LIVING." }
+  ],
+
+  "Part C": [
+    { w: "cogo", d: "to compel, force", m: "Co + ago = drive together. To COGENT-ly FORCE." },
+    { w: "colo", d: "to tend, cultivate, care for", m: "agriCULture — caring for the fields." },
+    { w: "curro", d: "to run", m: "CURRent runs; CURsor RUNS across the screen." },
+    { w: "dies", d: "day", m: "DIurnal, per DIEM — by the DAY." },
+    { w: "laetus", d: "happy, joyful", m: "Sounds like 'LATTE-us' — a latte makes you HAPPY." },
+    { w: "locus", d: "place, spot", m: "LOCAtion, LOCAl — a PLACE." },
+    { w: "magis", d: "more", m: "MAGnify = make MORE; MAGnitude." },
+    { w: "silva", d: "woods, forest", m: "Pennsylvania = Penn's WOODS (silva). SYLVAN = of the forest." }
+  ],
+
+  "Part D": [
+    { w: "ad (+acc.)", d: "to, toward", m: "ADvance, ADhere — moving TOWARD." },
+    { w: "ager, agri", d: "field, farm, land", m: "AGRIculture — care of the FIELDS." },
+    { w: "alter", d: "the other (of two)", m: "ALTERnate — the OTHER one." },
+    { w: "amnis", d: "river", m: "Sounds like 'amniotic' — fluid like a RIVER." },
+    { w: "aqua", d: "water", m: "AQUArium, AQUAtic — WATER." },
+    { w: "arbor", d: "tree", m: "ARBOR Day — plant a TREE." },
+    { w: "canis", d: "dog", m: "CANINE — DOG." },
+    { w: "capio", d: "to take, seize", m: "CAPture, CAPtive — TAKEN." },
+    { w: "celeritas", d: "speed, quickness", m: "ACCELERate — increase SPEED." },
+    { w: "cibus", d: "food, meal", m: "Sounds like 'see-boos' — see the FOOD coming." },
+    { w: "commodus", d: "suitable, favorable, timely", m: "ACCOMMODATing — making things SUITABLE." },
+    { w: "condo", d: "to found, establish", m: "A CONDOminium is FOUNDED on shared ownership." },
+    { w: "consumo", d: "to devour, consume", m: "CONSUME — straight English." },
+    { w: "copia", d: "abundance, supply; (pl.) troops", m: "CORNUCOPIA — horn of ABUNDANCE; COPIous = plentiful." },
+    { w: "denique", d: "finally, at last", m: "'DEN-i-kway' — FINALLY in the DEN at the END." },
+    { w: "flumen", d: "river, flood", m: "FLUent, FLUid — FLOWING like a river." },
+    { w: "homo, hominis", d: "human, person", m: "HOMo sapiens — wise HUMAN." },
+    { w: "invenio", d: "to come upon, find", m: "INVENT — to FIND something new." },
+    { w: "iugum", d: "yoke; mountain ridge", m: "subJUGate = put under the YOKE." },
+    { w: "manus", d: "hand; band of soldiers", m: "MANual, MANipulate — by HAND." },
+    { w: "mare", d: "sea", m: "MARine, MARiner — of the SEA." },
+    { w: "multus", d: "much, many", m: "MULTIple, MULTItude — MANY." },
+    { w: "natura", d: "nature, quality", m: "NATURE — straight English." },
+    { w: "nos", d: "we, us", m: "NOS = US in Spanish too." },
+    { w: "opus, operis", d: "work, labor; need", m: "An OPUS is a great WORK; OPERAte." },
+    { w: "propter", d: "because of, on account of", m: "Sounds like 'proper' — the PROPER reason WHY." },
+    { w: "quasi", d: "as if, just as if", m: "QUASI — straight English ('quasi-official')." },
+    { w: "quidam", d: "a certain one, some", m: "'KWEE-dam' — a CERTAIN dame, you know which one." },
+    { w: "res, rei", d: "thing, matter, affair", m: "REpublic = res publica — the PUBLIC THING." },
+    { w: "scientia", d: "knowledge, skill", m: "SCIENCE — knowledge." },
+    { w: "solus", d: "alone, only, sole", m: "SOLO, SOLE — ALONE." },
+    { w: "statim", d: "at once, immediately", m: "STAT! — medical for IMMEDIATELY." },
+    { w: "utor", d: "to use, enjoy (+abl.)", m: "USE — straight from utor (deponent)." },
+    { w: "vel", d: "or", m: "Sounds like 'well, OR...'" },
+    { w: "vis", d: "strength, force", m: "VIolent, VIm and vigor — FORCE." },
+    { w: "volo, -are", d: "to fly", m: "VOLley, VOLatile — FLYING through the air." }
+  ],
+
+  "Part E": [
+    { w: "a, ab, abs", d: "from, away from, by (+abl.)", m: "ABsent, ABstract — taken AWAY FROM." },
+    { w: "ago, agere", d: "to do, drive, lead, act", m: "ACT, AGEnt, AGEnda — what you DO/DRIVE." },
+    { w: "aio", d: "to assert, say", m: "Sounds like 'aye-oh' — saying AYE, agreeing." },
+    { w: "de (+abl.)", d: "down from, about", m: "DEscend, DEscribe — DOWN or ABOUT." },
+    { w: "diligens", d: "careful, diligent", m: "DILIGENT — straight English." },
+    { w: "ex, e", d: "out of, from (+abl.)", m: "EXit, EXtract — OUT of." },
+    { w: "meus", d: "my, mine", m: "Sounds like 'me-us' — belongs to ME." },
+    { w: "nihil, nil", d: "nothing", m: "NIHILism — belief in NOTHING." },
+    { w: "nisi", d: "if not, unless, except", m: "Ni + si = NOT if. UNLESS." },
+    { w: "provincia", d: "province; official duty", m: "PROVINCE — straight English." },
+    { w: "quis, quid", d: "who, what", m: "QUID pro quo — WHAT for WHAT." },
+    { w: "quisquam", d: "anyone, anything", m: "Quis (who) repeated — emphatic ANYONE at all." },
+    { w: "quisquis", d: "whoever, whatever", m: "Quis-quis — WHOever it is, doubled." },
+    { w: "tamen", d: "however, yet, still", m: "Sounds like 'TAH-men' — TAH! they came STILL." }
+  ],
+
+  "Part F": [
+    { w: "credo", d: "to believe, trust (+dat.)", m: "CREDIT, CREDible — what you BELIEVE." },
+    { w: "deus", d: "god, deity", m: "DEity — straight from deus." },
+    { w: "doceo", d: "to teach, instruct", m: "DOCtor, DOCument — TEACHING." },
+    { w: "facio", d: "to make, do, build", m: "FACtory MAKES things; manuFACTure." },
+    { w: "iubeo", d: "to order, bid", m: "Sounds like 'YOU-bay-oh' — YOU, do as I ORDER." },
+    { w: "magister", d: "master, chief, employer", m: "MAGISTRate, MASTER — boss in charge." },
+    { w: "metuo", d: "to fear, be afraid", m: "Sounds like 'met you' — and now I FEAR you." },
+    { w: "modo", d: "only, merely; recently", m: "Sounds like 'mode-oh' — just in this MODE, ONLY this way." },
+    { w: "tam", d: "so, so much, in such a degree", m: "'TAM' so big! Pairs with quam (as)." }
+  ],
+
+  "Part G": [
+    { w: "cras", d: "tomorrow", m: "ProCRAStinate = put off until TOMORROW." },
+    { w: "dignus", d: "worthy, deserving", m: "DIGNity, DIGNified — WORTHY." },
+    { w: "dulcis", d: "sweet", m: "DULCet tones — SWEET sounds." },
+    { w: "fessus", d: "tired", m: "Pro-FESS-or after a long day = TIRED." },
+    { w: "flos, floris", d: "flower, blossom", m: "FLORal, FLORist — FLOWER." },
+    { w: "frustra", d: "in vain, for nothing", m: "FRUSTRated — your effort was IN VAIN." },
+    { w: "hora", d: "hour, time, season", m: "HOUR — straight from hora." },
+    { w: "nobilis", d: "well-known, famous, noble", m: "NOBLE — straight English." },
+    { w: "o", d: "O! oh!", m: "O — straight English." },
+    { w: "proelium", d: "battle, combat", m: "Sounds like 'PRAY-lium' — pray before BATTLE." },
+    { w: "sanguis", d: "blood", m: "SANGuine, exSANGuinate — BLOOD." },
+    { w: "saxum", d: "large stone, rock", m: "Sounds like 'sax-um' — heavy as a SAXophone, a big ROCK." },
+    { w: "tango", d: "to touch", m: "TANGible — what you can TOUCH; conTACT." },
+    { w: "tuus", d: "your, yours (sing.)", m: "Sounds like 'TWO-us' — belongs to the SECOND person, YOU." },
+    { w: "unde", d: "from where, whence", m: "Sounds like 'oon-day' — WHERE from?" }
+  ],
+
+  "Part H": [
+    { w: "annus", d: "year", m: "ANNual, biANNual — YEAR." },
+    { w: "aperio", d: "to open, disclose, reveal", m: "APERTure on a camera OPENS to let in light." },
+    { w: "casus", d: "accident, mishap, calamity", m: "CASUalty — victim of a CALAMITY." },
+    { w: "gravis", d: "heavy, serious", m: "GRAVity, GRAVE — HEAVY and SERIOUS." },
+    { w: "haurio", d: "to drain, drink up", m: "Sounds like 'how-ree-oh' — how-much-can-you-DRINK?" },
+    { w: "idem, eadem, idem", d: "the same", m: "IDENTical — the SAME." },
+    { w: "ignis", d: "fire", m: "IGNite — set on FIRE." },
+    { w: "labor, lapsus", d: "to fall, slip", m: "ColLAPSE, reLAPSE — to FALL/SLIP." },
+    { w: "quia", d: "because, since", m: "Sounds like 'KEY-uh' — the KEY reason BECAUSE." },
+    { w: "sedeo", d: "to sit, remain, settle", m: "SEDentary — SITTING all the time." },
+    { w: "talis", d: "such, of such a kind", m: "Sounds like 'TALL-is' — SUCH a tall one." },
+    { w: "traho", d: "to draw, drag", m: "TRACTor TRACtion — DRAGS things." },
+    { w: "urbs, urbis", d: "city, walled town", m: "URBan, subURB — of the CITY." },
+    { w: "video", d: "to see, perceive", m: "VIDEO — what you SEE." }
+  ]
+};
+
+// --- STATE ----------------------------------------------------------------
+
+let state = {
+  section: null,
+  questions: [],
+  index: 0,
+  missed: [],
+  answeredCurrent: false
+};
+
+const stage = document.getElementById('stage');
+const nav = document.getElementById('nav');
+const sectionLabel = document.getElementById('section-label');
+
+// --- BUILD NAV ------------------------------------------------------------
+
+function buildNav() {
+  nav.innerHTML = '';
+  Object.keys(SECTIONS).forEach(name => {
+    const btn = document.createElement('button');
+    btn.textContent = name;
+    btn.dataset.section = name;
+    btn.addEventListener('click', () => startSection(name));
+    nav.appendChild(btn);
+  });
+}
+
+function setActiveNav(name) {
+  [...nav.querySelectorAll('button')].forEach(b => {
+    b.classList.toggle('active', b.dataset.section === name);
+  });
+}
+
+// --- UTIL -----------------------------------------------------------------
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickDistractors(correct, pool, n = 3) {
+  const others = pool.filter(x => x.d !== correct.d);
+  return shuffle(others).slice(0, n);
+}
+
+// --- FLOW -----------------------------------------------------------------
+
+function startSection(name) {
+  state.section = name;
+  state.questions = shuffle(SECTIONS[name]);
+  state.index = 0;
+  state.missed = [];
+  state.answeredCurrent = false;
+  sectionLabel.textContent = name;
+  setActiveNav(name);
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = state.questions[state.index];
+  const pool = SECTIONS[state.section];
+  const distractors = pickDistractors(q, pool, 3);
+  const choices = shuffle([q, ...distractors]);
+  const total = state.questions.length;
+  const pct = Math.round((state.index / total) * 100);
+
+  stage.innerHTML = `
+    <div class="progress">
+      <span>${state.section}</span>
+      <span>${state.index + 1} / ${total}</span>
+    </div>
+    <div class="progress-bar" style="--pct:${pct}%"></div>
+    <div class="question">Define</div>
+    <div class="word">${q.w}</div>
+    <ul class="choices">
+      ${choices.map((c, i) => `
+        <li class="choice" data-correct="${c.d === q.d}" data-def="${encodeURIComponent(c.d)}">
+          <span class="letter">${String.fromCharCode(65 + i)}</span>
+          ${c.d}
+        </li>
+      `).join('')}
+    </ul>
+    <div id="feedback-slot"></div>
+  `;
+
+  state.answeredCurrent = false;
+
+  stage.querySelectorAll('.choice').forEach(el => {
+    el.addEventListener('click', () => handleAnswer(el, q));
+  });
+}
+
+function handleAnswer(el, q) {
+  if (state.answeredCurrent) return;
+  state.answeredCurrent = true;
+
+  const isCorrect = el.dataset.correct === 'true';
+
+  stage.querySelectorAll('.choice').forEach(c => {
+    c.classList.add('disabled');
+    if (c.dataset.correct === 'true') {
+      c.classList.add('correct');
+    } else if (c === el) {
+      c.classList.add('incorrect');
+    }
+  });
+
+  if (!isCorrect) {
+    state.missed.push(q);
+    showFeedback(q);
+  } else {
+    showNext(false);
+  }
+}
+
+function showFeedback(q) {
+  const slot = document.getElementById('feedback-slot');
+  slot.innerHTML = `
+    <div class="feedback">
+      <div class="label">Mnemonic</div>
+      <div class="mnemonic-title">${q.w} — ${q.d}</div>
+      <p>${q.m}</p>
+      <div class="next-row">
+        <button class="ghost" id="next-btn">${isLast() ? 'See Results →' : 'Next →'}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('next-btn').addEventListener('click', advance);
+}
+
+function showNext(autoAdvance) {
+  const slot = document.getElementById('feedback-slot');
+  slot.innerHTML = `
+    <div class="feedback" style="border-style:dashed;">
+      <div class="label">Correct</div>
+      <p style="font-style:italic;">Nicely done.</p>
+      <div class="next-row">
+        <button class="ghost" id="next-btn">${isLast() ? 'See Results →' : 'Next →'}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('next-btn').addEventListener('click', advance);
+}
+
+function isLast() {
+  return state.index >= state.questions.length - 1;
+}
+
+function advance() {
+  if (isLast()) {
+    showResults();
+  } else {
+    state.index++;
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  const total = state.questions.length;
+  const correct = total - state.missed.length;
+  const pct = Math.round((correct / total) * 100);
+
+  let summary;
+  if (pct === 100) summary = 'A perfect run. You know this section cold.';
+  else if (pct >= 85) summary = 'Strong showing. A few stragglers below.';
+  else if (pct >= 70) summary = 'Solid foundation, room to tighten up.';
+  else if (pct >= 50) summary = 'Halfway there. Review the misses, then go again.';
+  else summary = 'Worth another pass. Mnemonics below.';
+
+  const missedHTML = state.missed.length === 0
+    ? `<p style="font-style:italic; color: var(--muted);">Nothing missed. Move on to another section.</p>`
+    : state.missed.map(q => `
+        <div class="missed-item">
+          <div class="missed-word">${q.w}</div>
+          <div class="missed-def">${q.d}</div>
+          <div class="missed-mnemonic">${q.m}</div>
+        </div>
+      `).join('');
+
+  stage.innerHTML = `
+    <div class="results">
+      <div class="eyebrow">Results · ${state.section}</div>
+      <h2>Here's how it went.</h2>
+      <div class="score-line">${correct}<span class="denom">/${total}</span></div>
+      <div class="summary">${summary} · ${pct}%</div>
+      <div class="missed-section">
+        <h3>${state.missed.length === 0 ? 'No Misses' : 'Words to Revisit'}</h3>
+        ${missedHTML}
+      </div>
+      <div class="results-actions">
+        <button class="primary" id="retry">Retry This Section</button>
+        <button class="ghost" id="pick-new">Pick Another Section</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('retry').addEventListener('click', () => startSection(state.section));
+  document.getElementById('pick-new').addEventListener('click', renderStart);
+}
+
+function renderStart() {
+  state.section = null;
+  setActiveNav(null);
+  sectionLabel.textContent = '— Choose a section —';
+  stage.innerHTML = `
+    <div class="start-screen">
+      <p>A multiple-choice quiz over Chapter 34's running vocabulary, broken into nine sections.</p>
+      <p>Each prompt shows a Latin word; pick the right English meaning from four options drawn from the same section. Misses get a mnemonic to help it stick — and the full list of missed words appears at the end.</p>
+      <div class="meta">Pick a section above to begin.</div>
+    </div>
+  `;
+}
+
+// --- INIT -----------------------------------------------------------------
+
+buildNav();
+renderStart();
+</script>
+
+</body>
+</html>
