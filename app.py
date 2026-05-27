@@ -218,9 +218,6 @@ def delete_all():
     client.close()
     return redirect('/admin')
 
-@app.route('/vocab')
-def vocab():
-    return render_template('vocab_quiz.html')
 
 @app.errorhandler(Exception)
 def handle_error(e):
